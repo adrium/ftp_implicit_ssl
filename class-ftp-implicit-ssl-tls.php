@@ -34,6 +34,13 @@ class FTP_Implicit_SSL {
 	 */
 	public function __construct( $username, $password, $server, $port = 990, $initial_path = '', $passive_mode = true, array $options = array() ) {
 
+		// check libcurl version
+		$versioninfo = curl_version();
+		$versionnumber = $versioninfo['version_number'];
+
+		if ( $versionnumber < 0x072200 )
+			throw new RuntimeException( 'Require at least libcurl 7.34.0' );
+
 		// check for blank username
 		if ( ! $username )
 			throw new InvalidArgumentException( 'FTP Username is blank.' );
@@ -61,7 +68,7 @@ class FTP_Implicit_SSL {
 		// connection options
 		$defaults = array(
 			CURLOPT_USERPWD        => $username . ':' . $password,
-			CURLOPT_FTP_SSL        => CURLFTPSSL_ALL, // require SSL For both control and data connections
+			CURLOPT_USE_SSL        => CURLUSESSL_ALL,
 			CURLOPT_UPLOAD         => true,
 			CURLOPT_PORT           => $port,
 			CURLOPT_TIMEOUT        => 30,
