@@ -27,11 +27,12 @@ class FTP_Implicit_SSL {
 	 * @param int $port
 	 * @param string $initial_path
 	 * @param bool $passive_mode
+	 * @param array $options - custom curl options
 	 * @throws InvalidArgumentException - blank username / password / port
 	 * @throws RuntimeException - curl errors
 	 * @return \FTP_Implicit_SSL
 	 */
-	public function __construct( $username, $password, $server, $port = 990, $initial_path = '', $passive_mode = false ) {
+	public function __construct( $username, $password, $server, $port = 990, $initial_path = '', $passive_mode = true, array $options = array() ) {
 
 		// check for blank username
 		if ( ! $username )
@@ -58,16 +59,15 @@ class FTP_Implicit_SSL {
 			throw new RuntimeException( 'Could not initialize cURL.' );
 
 		// connection options
-		$options = array(
+		$defaults = array(
 			CURLOPT_USERPWD        => $username . ':' . $password,
-			CURLOPT_SSL_VERIFYPEER => false, // don't verify SSL
-			CURLOPT_SSL_VERIFYHOST => false,
 			CURLOPT_FTP_SSL        => CURLFTPSSL_ALL, // require SSL For both control and data connections
-			CURLOPT_FTPSSLAUTH     => CURLFTPAUTH_DEFAULT, // let cURL choose the FTP authentication method (either SSL or TLS)
 			CURLOPT_UPLOAD         => true,
 			CURLOPT_PORT           => $port,
 			CURLOPT_TIMEOUT        => 30,
 		);
+
+		$options = $options + $defaults;
 
 		// cURL FTP enables passive mode by default, so disable it by enabling the PORT command and allowing cURL to select the IP address for the data connection
 		if ( ! $passive_mode )
