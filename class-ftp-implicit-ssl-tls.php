@@ -27,24 +27,25 @@ class FTP_Implicit_SSL {
 	 * @param int $port
 	 * @param string $initial_path
 	 * @param bool $passive_mode
-	 * @throws Exception - blank username / password / port
+	 * @throws InvalidArgumentException - blank username / password / port
+	 * @throws RuntimeException - curl errors
 	 * @return \FTP_Implicit_SSL
 	 */
 	public function __construct( $username, $password, $server, $port = 990, $initial_path = '', $passive_mode = false ) {
 
 		// check for blank username
 		if ( ! $username )
-			throw new Exception( 'FTP Username is blank.' );
+			throw new InvalidArgumentException( 'FTP Username is blank.' );
 
 		// don't check for blank password (highly-questionable use case, but still)
 
 		// check for blank server
 		if ( ! $server )
-			throw new Exception( 'FTP Server is blank.' );
+			throw new InvalidArgumentException( 'FTP Server is blank.' );
 
 		// check for blank port
 		if ( ! $port )
-			throw new Exception ( 'FTP Port is blank.', WC_XML_Suite::$text_domain );
+			throw new InvalidArgumentException ( 'FTP Port is blank.', WC_XML_Suite::$text_domain );
 
 		// set host/initial path
 		$this->url = "ftps://{$server}/{$initial_path}";
@@ -54,7 +55,7 @@ class FTP_Implicit_SSL {
 
 		// check for successful connection
 		if ( ! $this->curl_handle )
-			throw new Exception( 'Could not initialize cURL.' );
+			throw new RuntimeException( 'Could not initialize cURL.' );
 
 		// connection options
 		$options = array(
@@ -76,7 +77,7 @@ class FTP_Implicit_SSL {
 		foreach ( $options as $option_name => $option_value ) {
 
 			if ( ! curl_setopt( $this->curl_handle, $option_name, $option_value ) )
-				throw new Exception( sprintf( 'Could not set cURL option: %s', $option_name ) );
+				throw new RuntimeException( sprintf( 'Could not set cURL option: %s', $option_name ) );
 		}
 
 	}
@@ -88,7 +89,7 @@ class FTP_Implicit_SSL {
 	 * @since 1.0
 	 * @param string $file_name - remote file name to create
 	 * @param string $file - file content to upload
-	 * @throws Exception - Open remote file failure or write data failure
+	 * @throws RuntimeException - Open remote file failure or write data failure
 	 */
 	public function upload( $file_name, $file ) {
 		// set file name
@@ -99,17 +100,17 @@ class FTP_Implicit_SSL {
 		curl_setopt($this->curl_handle, CURLOPT_INFILESIZE, filesize($file));
 		// upload file
 		if ( ! curl_exec( $this->curl_handle ) )
-			throw new Exception( sprintf( 'Could not upload file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
+			throw new RuntimeException( sprintf( 'Could not upload file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
 	}
 
 	/**
 	 * @return array array of file names
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	public function ftplist(){
 
 		if ( ! curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url))
-			throw new Exception ("Could not set cURL directory: $this->url");
+			throw new RuntimeException ("Could not set cURL directory: $this->url");
 
 			curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 			curl_setopt( $this->curl_handle,CURLOPT_FTPLISTONLY,1);
