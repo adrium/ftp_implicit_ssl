@@ -56,6 +56,7 @@ class FTP_Implicit_SSL {
 			throw new InvalidArgumentException ( 'FTP Port is blank.', WC_XML_Suite::$text_domain );
 
 		// set host/initial path
+		$initial_path = trim($initial_path, '/');
 		$this->url = "ftps://{$server}/{$initial_path}";
 
 		// setup connection
@@ -100,7 +101,8 @@ class FTP_Implicit_SSL {
 	 */
 	public function upload( $file_name, $file ) {
 		// set file name
-		curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url . $file_name );
+		$file_name = trim($file_name, '/');
+		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$file_name}" );
 		// set the file to be uploaded
 		$fp = fopen ($file, "r");
 		curl_setopt( $this->curl_handle, CURLOPT_INFILE, $fp);
@@ -111,13 +113,15 @@ class FTP_Implicit_SSL {
 	}
 
 	/**
+	 * @param string $dir_name - remote directory name to list
 	 * @return array array of file names
 	 * @throws RuntimeException
 	 */
-	public function ftplist(){
+	public function ftplist($dir_name){
 
-		if ( ! curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url))
-			throw new RuntimeException ("Could not set cURL directory: $this->url");
+		$dir_name = trim($dir_name, '/');
+		if ( ! curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$dir_name}/"))
+			throw new RuntimeException ("Could not set cURL directory: {$this->url}/{$dir_name}");
 
 			curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 			curl_setopt( $this->curl_handle,CURLOPT_FTPLISTONLY,1);
@@ -142,16 +146,19 @@ class FTP_Implicit_SSL {
 	 * @return string
 	 */
 	public function download($file_name,$local_path='/'){
-		$file = fopen("$local_path$file_name", "w");
-		curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url . $file_name);
+		$file_name = trim($file_name, '/');
+		$local_path = rtrim($local_path, '/');
+		$file = basename($file_name);
+		$fp = fopen("{$local_path}/{$file}", "w");
+		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$file_name}");
 		curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 		curl_setopt( $this->curl_handle, CURLOPT_FOLLOWLOCATION, 1);
 		curl_setopt( $this->curl_handle, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt( $this->curl_handle, CURLOPT_FILE, $file);
+		curl_setopt( $this->curl_handle, CURLOPT_FILE, $fp);
 		curl_setopt( $this->curl_handle, CURLOPT_CUSTOMREQUEST, "RETR $file_name" );
 
 		$result = curl_exec($this->curl_handle);
-		fclose($file);
+		fclose($fp);
 
 		if( strlen($result) ){
 			return $result;
@@ -162,7 +169,8 @@ class FTP_Implicit_SSL {
 	}
 
 	public function remote_file_size($file_name){
-		curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url . $file_name);
+		$file_name = trim($file_name, '/');
+		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$file_name}");
 		curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 		curl_setopt( $this->curl_handle, CURLOPT_RETURNTRANSFER, TRUE);
     		curl_setopt( $this->curl_handle, CURLOPT_HEADER, TRUE);
@@ -175,7 +183,8 @@ class FTP_Implicit_SSL {
 	}
 
 	public function delete($file_name){
-		curl_setopt( $this->curl_handle, CURLOPT_URL, $this->url . $file_name);
+		$file_name = trim($file_name, '/');
+		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$file_name}");
 		curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 		curl_setopt( $this->curl_handle, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt( $this->curl_handle, CURLOPT_HEADER, false);
