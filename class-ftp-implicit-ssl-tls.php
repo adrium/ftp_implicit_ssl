@@ -84,7 +84,7 @@ class FTP_Implicit_SSL {
 		// set connection options, use foreach so useful errors can be caught instead of a generic "cannot set options" error with curl_setopt_array()
 		foreach ( $options as $option_name => $option_value ) {
 
-			if ( ! curl_setopt( $this->curl_handle, $option_name, $option_value ) )
+			if ( curl_setopt( $this->curl_handle, $option_name, $option_value ) !== true )
 				throw new RuntimeException( sprintf( 'Could not set cURL option: %s', $option_name ) );
 		}
 
@@ -108,7 +108,7 @@ class FTP_Implicit_SSL {
 		curl_setopt( $this->curl_handle, CURLOPT_INFILE, $fp);
 		curl_setopt($this->curl_handle, CURLOPT_INFILESIZE, filesize($file));
 		// upload file
-		if ( ! curl_exec( $this->curl_handle ) )
+		if ( curl_exec( $this->curl_handle ) === false )
 			throw new RuntimeException( sprintf( 'Could not upload file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
 	}
 
@@ -120,7 +120,7 @@ class FTP_Implicit_SSL {
 	public function ftplist($dir_name){
 
 		$dir_name = trim($dir_name, '/');
-		if ( ! curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$dir_name}/"))
+		if ( curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$dir_name}/") !== true )
 			throw new RuntimeException ("Could not set cURL directory: {$this->url}/{$dir_name}");
 
 			curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
@@ -160,6 +160,9 @@ class FTP_Implicit_SSL {
 		$result = curl_exec($this->curl_handle);
 		fclose($fp);
 
+		if ( $result === false )
+			throw new RuntimeException( sprintf( 'Could not download file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
+
 		if( strlen($result) ){
 			return $result;
 		} else {
@@ -179,6 +182,9 @@ class FTP_Implicit_SSL {
      		$data = curl_exec( $this->curl_handle);
      		$size = curl_getinfo( $this->curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
+		if ( $data === false )
+			throw new RuntimeException( sprintf( 'Could not get file size. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
+
      		return $size;
 	}
 
@@ -190,8 +196,11 @@ class FTP_Implicit_SSL {
 		curl_setopt( $this->curl_handle, CURLOPT_HEADER, false);
 		//curl_setopt( $this->curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 		curl_setopt( $this->curl_handle, CURLOPT_QUOTE,array('DELE ' . $file_name ));
-		$result = curl_exec( $this->curl_handle ) or die( curl_error( $this->curl_handle ) );
+		$result = curl_exec( $this->curl_handle );
 		$files = explode("\n",trim($result));
+
+		if ( $result === false )
+			throw new RuntimeException( sprintf( 'Could not delete file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
 
 		if( ! in_array( $file_name, $files ) ){
 			return $this->url . $file_name;
