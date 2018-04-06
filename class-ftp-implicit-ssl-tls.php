@@ -163,6 +163,8 @@ class FTP_Implicit_SSL {
 		if ( $result === false )
 			throw new RuntimeException( sprintf( 'Could not download file. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
 
+		curl_setopt( $this->curl_handle, CURLOPT_FILE, null);
+
 		if( strlen($result) ){
 			return $result;
 		} else {
@@ -180,7 +182,7 @@ class FTP_Implicit_SSL {
     		curl_setopt( $this->curl_handle, CURLOPT_NOBODY, TRUE);
 
      		$data = curl_exec( $this->curl_handle);
-     		$size = curl_getinfo( $this->curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+     		$size = (int) curl_getinfo( $this->curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
 		if ( $data === false )
 			throw new RuntimeException( sprintf( 'Could not get file size. cURL Error: [%s] - %s', curl_errno( $this->curl_handle ), curl_error( $this->curl_handle ) ) );
@@ -190,11 +192,11 @@ class FTP_Implicit_SSL {
 
 	public function delete($file_name){
 		$file_name = trim($file_name, '/');
-		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/{$file_name}");
+		curl_setopt( $this->curl_handle, CURLOPT_URL, "{$this->url}/");
 		curl_setopt( $this->curl_handle, CURLOPT_UPLOAD, false);
 		curl_setopt( $this->curl_handle, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt( $this->curl_handle, CURLOPT_HEADER, false);
-		//curl_setopt( $this->curl_handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+		curl_setopt( $this->curl_handle, CURLOPT_NOBODY, true);
 		curl_setopt( $this->curl_handle, CURLOPT_QUOTE,array('DELE ' . $file_name ));
 		$result = curl_exec( $this->curl_handle );
 		$files = explode("\n",trim($result));
