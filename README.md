@@ -1,1 +1,9 @@
-This is a copy of the [this gist](https://gist.githubusercontent.com/nalindaDJ/63dea19f07dcfbbf3d33/raw/9509f0c956a01c916685d2b67fd12645c6dd4749/class-ftp-implicit-ssl-tls.php) created by [Damith Jayasinghe](https://github.com/nalindaDJ) which was forked from [this gist](https://gist.githubusercontent.com/maxrice/4544344/raw/b94c87f33e9342a063560a8034828e161c24955c/class-ftp-implicit-ssl-tls.php) created by [Max Rice](http://maxrice.com/) to be used with composer.
+# Secure FTPS wrapper
+
+This is a wrapper for libcurl to securely use FTPS.
+It is based on works by different authors.
+
+The changes keep BC in the hope that the class will be upgraded
+where it is currently used.
+
+The ugly code style is also retained for now, sorry.

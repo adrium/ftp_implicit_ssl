@@ -1,9 +1,8 @@
 {
-    "name": "vendi-advertising/ftp_implicit_ssl",
+    "name": "adrium/ftp_implicit_ssl",
     "type": "library",
-    "version" : "1.1.1",
-    "description": "Simple wrapper for cURL functions to transfer an ASCII file over FTP with implicit SSL/TLS",
-    "homepage": "https://github.com/vendi-advertising/ftp_implicit_ssl",
+    "description": "A more secure wrapper for cURL functions to transfer an ASCII file over FTP with implicit SSL/TLS",
+    "homepage": "https://github.com/adrium/ftp_implicit_ssl",
     "license": "MIT",
     "authors": [
         {
@@ -20,6 +19,11 @@
             "name": "Chris Haas",
             "email": "chris@vendiadvertising.com",
             "homepage": "https://www.vendiadvertising.com/",
+            "role": "Developer"
+        },
+        {
+            "name": "Adrium",
+            "homepage": "https://github.com/adrium",
             "role": "Developer"
         }
     ],
